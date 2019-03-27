@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8.0)
+cmake_minimum_required(VERSION 3.5.0)
 project(Ptex)
 
 option(PTEX_BUILD_STATIC_LIBS "Enable building Ptex static libraries" ON)
@@ -61,8 +61,14 @@ include(CTest)
 include(FindThreads)
 
 # Use pkg-config to create a PkgConfig::Ptex_ZLIB imported target
-find_package(PkgConfig REQUIRED)
-pkg_checK_modules(Ptex_ZLIB REQUIRED zlib IMPORTED_TARGET)
+# find_package(PkgConfig REQUIRED)
+# pkg_checK_modules(Ptex_ZLIB REQUIRED zlib IMPORTED_TARGET)
+
+# Find zlib path from cmake argument `PTEX_ZLIB_PATH`
+find_library(Ptex_ZLIB z PATHS "${PTEX_ZLIB_PATH}/lib" NO_DEFAULT_PATH)
+message(STATUS "ZLIB_PATH " ${PTEX_ZLIB_PATH})
+message(STATUS "Ptex_ZLIB " ${Ptex_ZLIB})
+include_directories("${PTEX_ZLIB_PATH}/include")
 
 enable_testing()
 

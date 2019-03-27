@@ -1,3 +1,14 @@
+This is a AARCH64 port of PTex.
+
+First you need to build zlib in AARCH64 target.
+
+Please specify zlib path in `scripts/bootstrap-aarch64-linux-cross.sh`, then run this script to setup makefile using cmake.
+
+The following is from original ptex README
+
+-----------------------------------
+
+
 Building with make (Linux):
 > make prefix=$PWD/install
 > make test
