@@ -642,6 +642,12 @@ class PtexInputHandler {
     */
     virtual Handle open(const char* path) = 0;
 
+    /** Open a stream in read mode.
+        Returns null if there was an error.
+        If an error occurs, the error string is available via lastError().
+    */
+    virtual Handle open_stream(const unsigned char* bytes, const size_t num_bytes) = 0;
+
     /** Seek to an absolute byte position in the input stream. */
     virtual void seek(Handle handle, int64_t pos) = 0;
 

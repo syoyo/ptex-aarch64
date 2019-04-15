@@ -1,6 +1,43 @@
-#ifndef PtexReader_h
-#define PtexReader_h
+#ifndef PtexMemoryReader_h
+#define PtexMemoryReader_h
 
+/*
+Read Ptex from memory.
+Copyright 2019 Syoyo Fujita.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * The names "Syoyo Fujita" or the names of its contributors may NOT be used to
+    endorse or promote products derived from this software without
+    specific prior written permission from Walt Disney Pictures.
+
+Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
+IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+*/
+
+/*
+ PTexMemory reader is based on
+ */
 /*
 PTEX SOFTWARE
 Copyright 2014 Disney Enterprises, Inc.  All rights reserved
@@ -47,12 +84,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include "PtexHashMap.h"
 
+#include "StreamReader.h"
+
 PTEX_NAMESPACE_BEGIN
 
-class PtexReader : public PtexTexture {
+
+
+class PtexMemoryReader : public PtexTexture {
 public:
-    PtexReader(bool premultiply, PtexInputHandler* inputHandler, PtexErrorHandler* errorHandler);
-    virtual ~PtexReader();
+    PtexMemoryReader(bool premultiply, PtexInputHandler* inputHandler, PtexErrorHandler* errorHandler);
+    virtual ~PtexMemoryReader();
     virtual void release() { delete this; }
     bool needToOpen() const { return _needToOpen; }
     bool open(const char* path, Ptex::String& error);
@@ -119,7 +160,7 @@ public:
 
     class MetaData : public PtexMetaData {
     public:
-	MetaData(PtexReader* reader)
+	MetaData(PtexMemoryReader* reader)
 	    : _reader(reader) {}
         ~MetaData() {}
 	virtual void release() {}
@@ -335,7 +376,7 @@ public:
 
         Entry* getEntry(int index);
 
-        PtexReader* _reader;
+        PtexMemoryReader* _reader;
         typedef std::map<std::string, Entry> MetaMap;
         MetaMap _map;
         std::vector<Entry*> _entries;
@@ -369,7 +410,7 @@ public:
         virtual ~FaceData() {}
         virtual void release() { }
         virtual Ptex::Res res() { return _res; }
-        virtual FaceData* reduce(PtexReader*, Res newres, PtexUtils::ReduceFn, size_t& newMemUsed) = 0;
+        virtual FaceData* reduce(PtexMemoryReader*, Res newres, PtexUtils::ReduceFn, size_t& newMemUsed) = 0;
     protected:
         Res _res;
     };
@@ -389,7 +430,7 @@ public:
         virtual bool isTiled() { return false; }
         virtual Ptex::Res tileRes() { return _res; }
         virtual PtexFaceData* getTile(int) { return 0; }
-        virtual FaceData* reduce(PtexReader*, Res newres, PtexUtils::ReduceFn, size_t& newMemUsed);
+        virtual FaceData* reduce(PtexMemoryReader*, Res newres, PtexUtils::ReduceFn, size_t& newMemUsed);
 
     protected:
         virtual ~PackedFace() { delete [] _data; }
@@ -404,7 +445,7 @@ public:
             : PackedFace(0, pixelsize, pixelsize) {}
         virtual bool isConstant() { return true; }
         virtual void getPixel(int, int, void* result) { memcpy(result, _data, _pixelsize); }
-        virtual FaceData* reduce(PtexReader*, Res newres, PtexUtils::ReduceFn, size_t& newMemUsed);
+        virtual FaceData* reduce(PtexMemoryReader*, Res newres, PtexUtils::ReduceFn, size_t& newMemUsed);
     };
 
     class ErrorFace : public ConstantFace {
@@ -420,7 +461,7 @@ public:
 
     class TiledFaceBase : public FaceData {
     public:
-        TiledFaceBase(PtexReader* reader, Res resArg, Res tileresArg)
+        TiledFaceBase(PtexMemoryReader* reader, Res resArg, Res tileresArg)
             : FaceData(resArg),
               _reader(reader),
               _tileres(tileresArg)
@@ -440,7 +481,7 @@ public:
         virtual void* getData() { return 0; }
         virtual bool isTiled() { return true; }
         virtual Ptex::Res tileRes() { return _tileres; }
-        virtual FaceData* reduce(PtexReader*, Res newres, PtexUtils::ReduceFn, size_t& newMemUsed);
+        virtual FaceData* reduce(PtexMemoryReader*, Res newres, PtexUtils::ReduceFn, size_t& newMemUsed);
         Res tileres() const { return _tileres; }
         int ntilesu() const { return _ntilesu; }
         int ntilesv() const { return _ntilesv; }
@@ -455,7 +496,7 @@ public:
             }
         }
 
-        PtexReader* _reader;
+        PtexMemoryReader* _reader;
         Res _tileres;
         DataType _dt;
         int _nchan;
@@ -469,7 +510,7 @@ public:
 
     class TiledFace : public TiledFaceBase {
     public:
-        TiledFace(PtexReader* reader, Res resArg, Res tileresArg, int levelid)
+        TiledFace(PtexMemoryReader* reader, Res resArg, Res tileresArg, int levelid)
             : TiledFaceBase(reader, resArg, tileresArg),
               _levelid(levelid)
         {
@@ -488,7 +529,7 @@ public:
         }
 
     protected:
-        friend class PtexReader;
+        friend class PtexMemoryReader;
         int _levelid;
         std::vector<FaceDataHeader> _fdh;
         std::vector<FilePos> _offsets;
@@ -497,7 +538,7 @@ public:
 
     class TiledReducedFace : public TiledFaceBase {
     public:
-        TiledReducedFace(PtexReader* reader, Res resArg, Res tileresArg,
+        TiledReducedFace(PtexMemoryReader* reader, Res resArg, Res tileresArg,
                          TiledFaceBase* parentface, PtexUtils::ReduceFn reducefn)
             : TiledFaceBase(reader, resArg, tileresArg),
               _parentface(parentface),
@@ -610,30 +651,35 @@ protected:
 
     class DefaultInputHandler : public PtexInputHandler
     {
-        char* buffer;
+        uint8_t* buffer = nullptr;
+        simple_stream::StreamReader *ss = nullptr;
      public:
         DefaultInputHandler() : buffer(0) {}
-        virtual Handle open_stream(const unsigned char *bytes, const size_t num_bytes) {
-            // not used.
-            (void)bytes;
-            (void)num_bytes;
-            return nullptr;
+
+        virtual Handle open_stream(const unsigned char* bytes, const size_t num_bytes) {
+            // TODO(syoyo): Just retain pointer to `bytes` to save storage.
+            buffer = new uint8_t[num_bytes];
+
+            memcpy(buffer, bytes, num_bytes);
+
+            // TODO(syoyo): Endianness
+            ss = new simple_stream::StreamReader(buffer, num_bytes, /* swap_endian */false);
+
+            return reinterpret_cast<Handle>(ss);
         }
+
         virtual Handle open(const char* path) {
-            FILE* fp = fopen(path, "rb");
-            if (fp) {
-                buffer = new char [IBuffSize];
-                setvbuf(fp, buffer, _IOFBF, IBuffSize);
-            }
-            else buffer = 0;
-            return (Handle) fp;
+            // not used.
+            (void)path;
+            return nullptr;
         }
         virtual void seek(Handle handle, int64_t pos) { fseeko((FILE*)handle, pos, SEEK_SET); }
         virtual size_t read(void* bufferArg, size_t size, Handle handle) {
             return fread(bufferArg, size, 1, (FILE*)handle) == 1 ? size : 0;
         }
         virtual bool close(Handle handle) {
-            bool ok = handle && (fclose((FILE*)handle) == 0);
+            bool ok = handle;
+            if (ss) { delete ss; ss = 0; }
             if (buffer) { delete [] buffer; buffer = 0; }
             return ok;
         }
