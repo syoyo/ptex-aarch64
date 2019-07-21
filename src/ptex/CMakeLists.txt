@@ -6,17 +6,26 @@ configure_file(PtexVersion.h.in
     ${CMAKE_CURRENT_SOURCE_DIR}/PtexVersion.h @ONLY)
 
 set(SRCS
-    #PtexCache.cpp
-    #PtexReader.cpp
-    #PtexWriter.cpp
     PtexFilters.cpp
     PtexHalf.cpp
-    PtexMemoryReader.cpp
     PtexSeparableFilter.cpp
     PtexSeparableKernel.cpp
     PtexTriangleFilter.cpp
     PtexTriangleKernel.cpp
     PtexUtils.cpp)
+
+if (ANDROID)
+  list(APPEND SRCS
+    PtexMemoryReader.cpp
+  )
+else(ANDROID)
+  list(APPEND SRCS
+    PtexCache.cpp
+    PtexReader.cpp
+    PtexWriter.cpp
+  )
+  message(STATUS ${SRCS})
+endif(ANDROID)
 
 if(PTEX_BUILD_STATIC_LIBS)
     add_library(Ptex_static STATIC ${SRCS})
