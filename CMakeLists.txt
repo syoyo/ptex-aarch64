@@ -66,11 +66,20 @@ include(FindThreads)
 # find_package(PkgConfig REQUIRED)
 # pkg_checK_modules(Ptex_ZLIB REQUIRED zlib IMPORTED_TARGET)
 
-# Find zlib path from cmake argument `PTEX_ZLIB_PATH`
-find_library(Ptex_ZLIB z PATHS "${PTEX_ZLIB_PATH}/lib" NO_DEFAULT_PATH)
+## Find zlib path from cmake argument `PTEX_ZLIB_PATH`
+#find_library(Ptex_ZLIB z PATHS "${PTEX_ZLIB_PATH}/lib" NO_DEFAULT_PATH)
+#message(STATUS "ZLIB_PATH " ${PTEX_ZLIB_PATH})
+#message(STATUS "Ptex_ZLIB " ${Ptex_ZLIB})
+#include_directories("${PTEX_ZLIB_PATH}/include")
+
+# Use system zlib
+find_package(ZLIB REQUIRED)
+message(STATUS "ZLIB_LIBRARIES " ${ZLIB_LIBRARIES})
+message(STATUS "ZLIB_INCLUDE_DIRS " ${ZLIB_INCLUDE_DIRS})
+set(PTEX_ZLIB ${ZLIB_LIBRARIES})
 message(STATUS "ZLIB_PATH " ${PTEX_ZLIB_PATH})
 message(STATUS "Ptex_ZLIB " ${Ptex_ZLIB})
-include_directories("${PTEX_ZLIB_PATH}/include")
+include_directories(${ZLIB_INCLUDE_DIRS})
 
 enable_testing()
 
