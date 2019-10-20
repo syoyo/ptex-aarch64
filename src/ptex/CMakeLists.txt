@@ -36,7 +36,7 @@ if(PTEX_BUILD_STATIC_LIBS)
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(Ptex_static
-        PUBLIC ${CMAKE_THREAD_LIBS_INIT} ${PTEX_ZLIB})
+        PUBLIC Threads::Threads ${PTEX_ZLIB})
     install(TARGETS Ptex_static EXPORT Ptex DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
@@ -49,7 +49,7 @@ if(PTEX_BUILD_SHARED_LIBS)
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(Ptex_dynamic
-        PUBLIC ${CMAKE_THREAD_LIBS_INIT} ${PTEX_ZLIB})
+        PUBLIC Threads::Threads ${PTEX_ZLIB})
     install(TARGETS Ptex_dynamic EXPORT Ptex DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
