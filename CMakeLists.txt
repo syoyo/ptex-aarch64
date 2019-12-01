@@ -3,6 +3,7 @@ project(Ptex)
 
 option(PTEX_BUILD_STATIC_LIBS "Enable building Ptex static libraries" ON)
 option(PTEX_BUILD_SHARED_LIBS "Enable building Ptex shared libraries" ON)
+option(PTEX_USE_EXTERNAL_ZLIB "Use external zlib library" OFF)
 option(PRMAN_15_COMPATIBLE_PTEX "Enable PRMan 15 compatibility" OFF)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -44,8 +45,13 @@ find_package(Threads REQUIRED)
 #message(STATUS "Ptex_ZLIB " ${Ptex_ZLIB})
 #include_directories("${PTEX_ZLIB_PATH}/include")
 
-# Use system zlib
-find_package(ZLIB REQUIRED)
+if (PTEX_USE_EXTERNAL_ZLIB)
+  # Assume ZLIB_INCLUIDE_DIR is provided somewhere
+else()
+  # Use system zlib
+  find_package(ZLIB REQUIRED)
+endif ()
+
 message(STATUS "ZLIB_LIBRARIES " ${ZLIB_LIBRARIES})
 message(STATUS "ZLIB_INCLUDE_DIRS " ${ZLIB_INCLUDE_DIRS})
 set(PTEX_ZLIB ${ZLIB_LIBRARIES})
